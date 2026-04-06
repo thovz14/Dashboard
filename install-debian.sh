@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-REPO_URL="https://github.com/thovz14/dashboard.git"
+REPO_URL="https://github.com/thovz14/Dashboard.git"
 PROJECT_DIR="${1:-.}/Dashboard-goed"
 INSTALLER="apt"
 SUDO=""

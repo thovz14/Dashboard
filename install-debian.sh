@@ -2,8 +2,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="${1:-.}"
+PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"
 REPO_URL="https://github.com/thovz14/Dashboard.git"
-PROJECT_DIR="${1:-.}/Dashboard-goed"
 INSTALLER="apt"
 SUDO=""
 
@@ -21,11 +23,21 @@ function info() {
 }
 
 function clone_repo() {
-    if [[ ! -d "$PROJECT_DIR" ]]; then
-        info "Repository klonen van $REPO_URL naar $PROJECT_DIR"
-        git clone "$REPO_URL" "$PROJECT_DIR"
+    # Als we al in een git-repo zitten die Dashboard is, skip klonen
+    if [[ -f "$PROJECT_DIR/server.js" && -f "$PROJECT_DIR/index.html" ]]; then
+        info "Dashboard-bestanden al gevonden in $PROJECT_DIR"
+        return
+    fi
+    
+    # Anders klonen we in een submap
+    local target_dir="$PROJECT_DIR/Dashboard-goed"
+    if [[ ! -d "$target_dir" ]]; then
+        info "Repository klonen van $REPO_URL naar $target_dir"
+        git clone "$REPO_URL" "$target_dir"
+        PROJECT_DIR="$target_dir"
     else
-        info "Project-map bestaat al: $PROJECT_DIR"
+        info "Project-map bestaat al: $target_dir"
+        PROJECT_DIR="$target_dir"
     fi
 }
 
@@ -94,9 +106,10 @@ function prepare_data_dirs() {
 function create_systemd_service() {
     local service_path="/etc/systemd/system/dashboard.service"
     local user_name="${SUDO_USER:-$(whoami)}"
+    
     if [[ -f "$service_path" ]]; then
-        info "Systemd service bestaat al: $service_path"
-        return
+        info "Service bestand bestaat al, vervangen..."
+        $SUDO rm "$service_path"
     fi
 
     info "Systemd service aanmaken in $service_path"
@@ -113,6 +126,8 @@ Restart=always
 RestartSec=5
 User=$user_name
 Environment=NODE_ENV=production
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target

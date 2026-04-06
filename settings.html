@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instellingen</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="menu">
+        <a href="index.html" class="link">
+            <i data-lucide="layout-grid"></i>
+            <span class="label">Dashboard</span>
+        </a>
+        <a href="home-assistant.html" class="link">
+            <i data-lucide="home"></i>
+            <span class="label">HA</span>
+        </a>
+        <a href="settings.html" class="link active">
+            <i data-lucide="settings"></i>
+            <span class="label">Instellingen</span>
+        </a>
+        <div class="profile-wrap">
+            <button class="profile-trigger" id="profileBtn" type="button" aria-expanded="false">
+                <span class="profile-avatar">TH</span>
+            </button>
+            <div class="profile-menu" id="profileMenu" role="menu">
+                <a href="account.html" class="profile-item"><span class="menu-item-icon"><i class="fa fa-user"></i></span>Account details</a>
+                <a href="settings.html" class="profile-item"><span class="menu-item-icon"><i class="fa fa-cog"></i></span>Instellingen</a>
+                <a href="home-assistant.html" class="profile-item"><span class="menu-item-icon"><i class="fa fa-house"></i></span>Home Assistant</a>
+                <div class="menu-item-divider"></div>
+                <button type="button" class="profile-item logout-item" id="logout-btn"><span class="menu-item-icon"><i class="fa fa-sign-out-alt"></i></span>Uitloggen</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main class="dashboard">
+            <div id="topbar">
+                <div id="topbar-left">
+                    <div id="topbar-title"><i class="fa fa-cog"></i> Instellingen</div>
+                    <div id="topbar-host">Instellingenpagina</div>
+                </div>
+                <div id="topbar-right">
+                    <div id="topbar-clock">00:00:00</div>
+                    <div id="topbar-date">─</div>
+                </div>
+            </div>
+
+            <div class="panel panel-left" style="margin-top:16px;">
+                <div class="panel-header"><span>Applicatie voorkeuren</span></div>
+                <div class="panel-body">
+                    <div class="f-group">
+                        <label class="f-label">Controle-interval</label>
+                        <select class="f-select" id="setting-refresh">
+                            <option value="10">10 seconden</option>
+                            <option value="30">30 seconden</option>
+                            <option value="60">60 seconden</option>
+                        </select>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Download map</label>
+                        <input class="f-input" id="setting-download-path" type="text" placeholder="C:\\Youtube\\Downloads">
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Notificaties</label>
+                        <div class="toggle-row">
+                            <span class="toggle-label">Email notificaties</span>
+                            <label class="toggle">
+                                <input type="checkbox" id="setting-notifications">
+                                <div class="toggle-track"></div>
+                            </label>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+                        <button class="btn btn-primary" onclick="saveSettings()"><i class="fa fa-floppy-disk"></i> Opslaan</button>
+                        <button class="btn btn-secondary" onclick="loadSettings()"><i class="fa fa-rotate-left"></i> Herladen</button>
+                    </div>
+                    <div class="f-hint" id="settings-message" style="margin-top:14px;color:#a3e635;display:none;">Instellingen opgeslagen.</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBWYgplbhCzOx6G0_Fb5xEMBdIyGFVcVM",
+            authDomain: "dashboard-1cea2.firebaseapp.com",
+            projectId: "dashboard-1cea2",
+            storageBucket: "dashboard-1cea2.firebasestorage.app",
+            messagingSenderId: "911950089916",
+            appId: "1:911950089916:web:36413c7d3267aca1438ab9",
+            measurementId: "G-F4G4183JSF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout fout:', error);
+            }
+        });
+
+        function saveSettings() {
+            const config = {
+                refresh: document.getElementById('setting-refresh').value,
+                path: document.getElementById('setting-download-path').value,
+                notifications: document.getElementById('setting-notifications').checked,
+            };
+            localStorage.setItem('appSettings', JSON.stringify(config));
+            const msg = document.getElementById('settings-message');
+            msg.style.display = 'block';
+            setTimeout(() => msg.style.display = 'none', 2500);
+        }
+
+        function loadSettings() {
+            const config = JSON.parse(localStorage.getItem('appSettings') || '{}');
+            if (config.refresh) document.getElementById('setting-refresh').value = config.refresh;
+            if (config.path) document.getElementById('setting-download-path').value = config.path;
+            document.getElementById('setting-notifications').checked = !!config.notifications;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+        });
+    </script>
+    <script src="scripts.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

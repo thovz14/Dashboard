@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="menu">
+        <a href="index.html" class="link">
+            <i data-lucide="layout-grid"></i>
+            <span class="label">Dashboard</span>
+        </a>
+        <a href="home-assistant.html" class="link active">
+            <i data-lucide="home"></i>
+            <span class="label">HA</span>
+        </a>
+        <a href="settings.html" class="link">
+            <i data-lucide="settings"></i>
+            <span class="label">Instellingen</span>
+        </a>
+        <div class="profile-wrap">
+            <button class="profile-trigger" id="profileBtn" type="button" aria-expanded="false">
+                <span class="profile-avatar">TH</span>
+            </button>
+            <div class="profile-menu" id="profileMenu" role="menu">
+                <a href="account.html" class="profile-item"><span class="menu-item-icon"><i class="fa fa-user"></i></span>Account details</a>
+                <a href="settings.html" class="profile-item"><span class="menu-item-icon"><i class="fa fa-cog"></i></span>Instellingen</a>
+                <a href="home-assistant.html" class="profile-item"><span class="menu-item-icon"><i class="fa fa-house"></i></span>Home Assistant</a>
+                <div class="menu-item-divider"></div>
+                <button type="button" class="profile-item logout-item" id="logout-btn"><span class="menu-item-icon"><i class="fa fa-sign-out-alt"></i></span>Uitloggen</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main class="dashboard">
+            <div id="topbar">
+                <div id="topbar-left">
+                    <div id="topbar-title"><i class="fa fa-house-signal"></i> Home Assistant</div>
+                    <div id="topbar-host">Automatiseringen beheren</div>
+                </div>
+                <div id="topbar-right">
+                    <div id="topbar-clock">00:00:00</div>
+                    <div id="topbar-date">─</div>
+                </div>
+            </div>
+
+            <div class="panel panel-left" style="margin-top:16px;">
+                <div class="panel-header"><span>Home Assistant koppeling</span></div>
+                <div class="panel-body">
+                    <div class="f-group">
+                        <label class="f-label">HA basis-URL</label>
+                        <input class="f-input" id="ha-url" type="text" placeholder="http://homeassistant.local:8123">
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Long-Lived Access Token</label>
+                        <input class="f-input" id="ha-token" type="password" placeholder="eyJ0eXAiOiJKV1Q…">
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Webhook ID</label>
+                        <input class="f-input" id="ha-webhook" type="text" placeholder="prik_herinnering">
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Startdatum</label>
+                        <input class="f-input" id="ha-startdate" type="date">
+                    </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+                        <button class="btn btn-primary" onclick="saveHA()"><i class="fa fa-floppy-disk"></i> Opslaan</button>
+                        <button class="btn btn-secondary" onclick="loadHAConfig()"><i class="fa fa-rotate-left"></i> Herladen</button>
+                    </div>
+                    <div id="ha-status-info" class="f-hint" style="margin-top:14px;color:#a3e635;display:none;">Home Assistant gegevens opgeslagen.</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBWYgplbhCzOx6G0_Fb5xEMBdIyGFVcVM",
+            authDomain: "dashboard-1cea2.firebaseapp.com",
+            projectId: "dashboard-1cea2",
+            storageBucket: "dashboard-1cea2.firebasestorage.app",
+            messagingSenderId: "911950089916",
+            appId: "1:911950089916:web:36413c7d3267aca1438ab9",
+            measurementId: "G-F4G4183JSF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout fout:', error);
+            }
+        });
+
+        function loadHAConfig() {
+            const config = JSON.parse(localStorage.getItem('haConfig') || '{}');
+            document.getElementById('ha-url').value = config.url || '';
+            document.getElementById('ha-token').value = config.token || '';
+            document.getElementById('ha-webhook').value = config.webhook || '';
+            document.getElementById('ha-startdate').value = config.startdate || '';
+            document.getElementById('ha-status-info').style.display = 'none';
+        }
+
+        function saveHA() {
+            const config = {
+                url: document.getElementById('ha-url').value.trim(),
+                token: document.getElementById('ha-token').value.trim(),
+                webhook: document.getElementById('ha-webhook').value.trim(),
+                startdate: document.getElementById('ha-startdate').value,
+            };
+            localStorage.setItem('haConfig', JSON.stringify(config));
+            document.getElementById('ha-status-info').style.display = 'block';
+            setTimeout(() => document.getElementById('ha-status-info').style.display = 'none', 2500);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHAConfig();
+        });
+    </script>
+    <script src="scripts.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

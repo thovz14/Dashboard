@@ -1,0 +1,273 @@
+﻿<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <nav class="menu">
+        <a href="index.html" class="link active">
+            <i data-lucide="layout-grid"></i>
+            <span class="label">Dashboard</span>
+        </a>
+        <a href="account.html" class="link">
+            <i data-lucide="user"></i>
+            <span class="label">Account</span>
+        </a>
+        <a href="settings.html" class="link">
+            <i data-lucide="settings"></i>
+            <span class="label">Instellingen</span>
+        </a>
+        <a href="home-assistant.html" class="link">
+            <i data-lucide="home"></i>
+            <span class="label">Home Assistant</span>
+        </a>
+        <a href="#" class="link" id="logout-btn">
+            <i data-lucide="log-out"></i>
+            <span class="label">Logout</span>
+        </a>
+    </nav>
+
+    <div class="container">
+        <main class="dashboard" id="top">
+            <div id="topbar">
+                <div id="topbar-left">
+                    <div id="topbar-title"><i class="fa fa-gauge-high"></i> Server Dashboard</div>
+                    <div id="topbar-host">Laden…</div>
+                </div>
+                <div id="topbar-right">
+                    <div id="topbar-clock">00:00:00</div>
+                    <div id="topbar-date">─</div>
+                </div>
+            </div>
+
+            <div id="summary">
+                <div class="s-pill pill-ok"><div class="dot dot-ok"></div><span id="cnt-ok">0</span> actief</div>
+                <div class="s-pill pill-err"><div class="dot dot-err"></div><span id="cnt-err">0</span> fout</div>
+                <div class="s-pill pill-warn"><div class="dot dot-warn"></div><span id="cnt-warn">0</span> waarschuwing</div>
+                <div id="sum-spacer"></div>
+                <button id="btn-check" class="btn btn-secondary btn-sm" onclick="triggerCheck()"><i class="fa fa-rotate-right"></i> Nu checken</button>
+                <button id="btn-manage" class="btn btn-secondary btn-sm" onclick="openManage()"><i class="fa fa-sliders"></i> Servers beheren</button>
+                <div id="last-update">─</div>
+            </div>
+
+            <div class="dashboard-grid">
+                <section class="panel panel-left" id="servers">
+                    <div class="panel-header"><span>Server status</span></div>
+                    <div class="panel-body">
+                        <div id="server-grid" class="server-grid"></div>
+                        <div id="empty-state" class="empty-state">
+                            <div class="empty-icon"><i class="fa fa-server"></i></div>
+                            <p>Nog geen servers toegevoegd. Klik op "Servers beheren" om te beginnen.</p>
+                            <button class="btn btn-primary" onclick="openManage()"><i class="fa fa-plus"></i> Server toevoegen</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel panel-right" id="youtube">
+                    <div class="panel-header"><span>YouTube Manager</span></div>
+                    <div class="panel-body">
+                        <div class="f-group">
+                            <label class="f-label">YouTube link</label>
+                            <input class="f-input" id="yt-url" type="text" placeholder="https://www.youtube.com/watch?v=...">
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">Opslagmap</label>
+                            <input class="f-input" id="yt-path" type="text" placeholder="C:\\Youtube\\Downloads">
+                        </div>
+                        <div class="dl-row">
+                            <button id="download-btn" class="btn btn-mint" onclick="startDownload()"><i class="fa fa-download"></i> Downloaden</button>
+                            <span id="dl-status">Klaar</span>
+                        </div>
+                        <div class="log-toggle" onclick="toggleLog()">▾ Toon logs</div>
+                        <div class="log-box" id="log-box"></div>
+                        <div class="panel-section">
+                            <h3 style="margin-bottom:12px">Gedownloade videos</h3>
+                            <div id="download-list" class="download-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel panel-right" id="info">
+                    <div class="panel-header"><span>Meer informatie</span></div>
+                    <div class="panel-body">
+                        <div class="f-group">
+                            <p style="color:#c0d8d0;line-height:1.6;">Gebruik deze dashboard-app op je Debian mini-pc. Scrol naar beneden en gebruik de vaste navigatiebalk om snel te wisselen tussen de secties.</p>
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">Systeemadvies</label>
+                            <div class="d-body" style="background:var(--dark3);border-radius:14px;padding:1rem;">
+                                <div class="d-stat"><div class="d-stat-label">Besturingssysteem</div><div class="d-stat-value">Debian Linux</div></div>
+                                <div class="d-stat"><div class="d-stat-label">Server</div><div class="d-stat-value">Mini PC</div></div>
+                                <div class="d-stat"><div class="d-stat-label">Opslag</div><div class="d-stat-value">Altijd veilig opslaan</div></div>
+                            </div>
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">Tips</label>
+                            <ul style="color:#c0d8d0;line-height:1.6;padding-left:18px;">
+                                <li>Voeg servers toe via Servers beheren.</li>
+                                <li>Open serverdetails door op een kaart te klikken.</li>
+                                <li>Gebruik de Home Assistant-knop voor je webhooks.</li>
+                                <li>Voor echte SSH moet je dit dashboard koppelen aan een backend.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="detail-overlay" class="overlay">
+        <div class="panel panel-md">
+            <div class="panel-header">
+                <div class="panel-title" id="detail-title">Server details</div>
+                <button class="btn-close" onclick="closeDetail()"><i class="fa fa-xmark"></i></button>
+            </div>
+            <div class="d-status-bar">
+                <div class="d-status-icon ok" id="detail-icon"><i class="fa fa-circle-check"></i></div>
+                <div class="d-status-text">
+                    <h3 id="detail-status-text">─</h3>
+                    <p id="detail-host-text">─</p>
+                </div>
+            </div>
+            <div class="detail-actions">
+                <button class="btn btn-secondary btn-sm" onclick="refreshDetailStatus()"><i class="fa fa-rotate-right"></i> Hercontroleer</button>
+                <button class="btn btn-secondary btn-sm" id="detail-terminal-btn" onclick="openTerminal()"><i class="fa fa-terminal"></i> Terminal</button>
+                <button class="btn btn-secondary btn-sm" onclick="editCurrentServer()"><i class="fa fa-pen"></i> Bewerken</button>
+            </div>
+            <div class="d-body">
+                <div class="d-stats" id="detail-stats"></div>
+                <div class="d-section">Poorten</div>
+                <div class="d-ports" id="detail-ports"></div>
+                <div class="d-section">Informatie</div>
+                <div id="detail-extra"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="manage-overlay" class="overlay">
+        <div class="panel panel-lg">
+            <div class="panel-header">
+                <div class="panel-title"><i class="fa fa-server" style="color:var(--accent);margin-right:6px"></i> Servers beheren</div>
+                <button class="btn-close" onclick="closeManage()"><i class="fa fa-xmark"></i></button>
+            </div>
+            <div class="manage-toolbar">
+                <button class="btn btn-primary" onclick="openServerForm(null)"><i class="fa fa-plus"></i> Server toevoegen</button>
+                <input class="manage-search" id="manage-search" type="text" placeholder="Zoeken op naam, host of poort…" oninput="renderManageList()">
+            </div>
+            <div class="manage-list" id="manage-list"></div>
+        </div>
+    </div>
+
+    <div id="server-form-overlay" class="overlay">
+        <div class="panel panel-sm">
+            <div class="panel-header">
+                <div class="panel-title" id="form-title"><i class="fa fa-plus" style="margin-right:6px"></i> Server toevoegen</div>
+                <button class="btn-close" onclick="closeServerForm()"><i class="fa fa-xmark"></i></button>
+            </div>
+            <div class="form-tabs">
+                <button class="form-tab active" onclick="switchTab('general')"><i class="fa fa-server"></i> Algemeen</button>
+                <button class="form-tab" onclick="switchTab('ssh')"><i class="fa fa-terminal"></i> SSH</button>
+            </div>
+            <div class="form-tab-content active" id="tab-general">
+                <input type="hidden" id="f-id">
+                <div class="form-grid">
+                    <div class="f-group">
+                        <label class="f-label">Naam *</label>
+                        <input class="f-input" id="f-name" type="text" placeholder="Home Assistant">
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Host / IP *</label>
+                        <input class="f-input" id="f-host" type="text" placeholder="192.168.1.10">
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Poorten (komma-gescheiden)</label>
+                        <input class="f-input" id="f-ports" type="text" placeholder="8123, 443, 80">
+                        <div class="f-hint">Eerste poort wordt gebruikt voor statuscheck</div>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Beginstatus</label>
+                        <select class="f-select" id="f-status">
+                            <option value="unknown">Automatisch detecteren</option>
+                            <option value="ok">Actief</option>
+                            <option value="warn">Waarschuwing</option>
+                            <option value="error">Fout</option>
+                            <option value="off">Uit</option>
+                        </select>
+                    </div>
+                    <div class="f-group form-full">
+                        <label class="f-label">Omschrijving</label>
+                        <input class="f-input" id="f-desc" type="text" placeholder="Korte omschrijving van de service">
+                    </div>
+                    <div class="f-group form-full">
+                        <label class="f-label">Check-URL (optioneel)</label>
+                        <input class="f-input" id="f-url" type="text" placeholder="http://192.168.1.10:8123/api/">
+                        <div class="f-hint">Leeg laten voor TCP-poortcheck</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-tab-content" id="tab-ssh">
+                <div class="toggle-row">
+                    <span class="toggle-label"><i class="fa fa-terminal" style="margin-right:6px;color:var(--accent)"></i> SSH Terminal inschakelen</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="f-ssh-enabled" onchange="toggleSshFields()">
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+                <div class="ssh-section hidden" id="ssh-fields">
+                    <div class="form-grid">
+                        <div class="f-group">
+                            <label class="f-label">SSH host</label>
+                            <input class="f-input" id="f-ssh-host" type="text" placeholder="Zelfde als host">
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">SSH poort</label>
+                            <input class="f-input" id="f-ssh-port" type="number" value="22" min="1" max="65535">
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">Gebruikersnaam *</label>
+                            <input class="f-input" id="f-ssh-user" type="text" placeholder="pi">
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">Wachtwoord</label>
+                            <input class="f-input" id="f-ssh-pass" type="password" placeholder="••••••••">
+                        </div>
+                    </div>
+                    <div class="f-hint" style="margin-top:.25rem"><i class="fa fa-shield" style="margin-right:4px"></i> SSH wachtwoord wordt lokaal opgeslagen.</div>
+                </div>
+            </div>
+            <div style="padding:0 1.5rem 1.5rem;display:flex;gap:8px;margin-top:.25rem">
+                <button class="btn btn-secondary" style="flex:none" onclick="closeServerForm()">Annuleren</button>
+                <button class="btn btn-primary" style="flex:1" onclick="saveServer()"><i class="fa fa-floppy-disk"></i> Opslaan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="terminal-overlay" class="overlay">
+        <div class="panel panel-xl" style="height:82vh;display:flex;flex-direction:column;">
+            <div id="terminal-header">
+                <div id="terminal-title"><i class="fa fa-terminal" style="color:var(--accent)"></i><span id="terminal-server-name">─</span></div>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <span id="terminal-status" class="connecting">Klaar</span>
+                    <button class="btn-close" onclick="closeTerminal()"><i class="fa fa-xmark"></i></button>
+                </div>
+            </div>
+            <div id="terminal-container" style="padding:1rem;color:var(--text2);background:var(--bg3);flex:1;overflow:auto;white-space:pre-wrap;">
+                Terminal is nog niet verbonden. Deze demo gebruikt nog geen echte SSH-server.
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="auth.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="scripts.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
+
